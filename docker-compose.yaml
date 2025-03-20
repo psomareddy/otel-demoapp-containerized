@@ -1,0 +1,49 @@
+version: '3.7'
+
+services:
+  
+  mongodb:
+    container_name: mongodb
+    image: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - ./api/data:/data/db
+      - ./api/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+    networks:
+      - demoapp-network
+
+  otelcol:
+    container_name: otel-col
+    image: otel/opentelemetry-collector-contrib:latest
+    deploy:
+      resources:
+        limits:
+          memory: 125M
+    command: ["--config=/etc/otelcol-config.yml"]
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./otelcollector/otelcol-config.yml:/etc/otelcol-config.yml
+      # - ./otelcollector/otelcol-config-filelog.yml:/etc/otelcol-config-filelog.yml
+      - ./logs:/logs
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    ports:
+      - "4317" # OTLP over gRPC receiver
+      - "4318" # OTLP over http receiver
+      - "8888"
+      - "13133"
+    environment:
+      - ENVOY_PORT
+      - SPLUNK_ACCESS_TOKEN=${SPLUNK_ACCESS_TOKEN}
+      - SPLUNK_REALM=${SPLUNK_REALM}
+      - SPLUNK_HEC_TOKEN=${SPLUNK_HEC_TOKEN}
+      - SPLUNK_HEC_URL=${SPLUNK_HEC_URL}
+      - SPLUNK_MEMORY_TOTAL_MIB=${SPLUNK_MEMORY_TOTAL_MIB}
+    networks:
+      - demoapp-network
+
+networks:
+  demoapp-network:
+    driver: bridge
+

@@ -1,0 +1,44 @@
+# Open Telemetry Config
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - "http://*"
+            - "https://*"
+exporters:
+  debug:
+    verbosity: detailed
+  splunk_hec:
+    token: "${SPLUNK_HEC_TOKEN}"
+    endpoint: "${SPLUNK_HEC_URL}"
+    source: "otel"
+    sourcetype: "otel"
+    index: "splunk4rookies-workshop"
+    profiling_data_enabled: false
+    tls:
+      insecure: true
+
+processors:
+  batch:
+
+extensions:
+  health_check: 
+    endpoint: "${SPLUNK_LISTEN_INTERFACE}:13133"
+
+connectors:
+  spanmetrics:
+
+service:
+  extensions: [health_check]
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [splunk_hec]
+
