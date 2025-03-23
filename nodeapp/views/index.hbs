@@ -1,0 +1,18 @@
+{{#each inventoryItems}}
+   <div class="flex items-center">
+      <div class="w-14"><img src="/images/item.png" class="h-9"></div>
+      <div class=""><h3>{{ itemSKU }} </h3></div>
+   </div>
+   <br />
+   {{ description }}
+   <br /><br />
+   <b>Availability</b>
+   <br />
+   
+   {{#each inventoryByLocation}}
+        Location: {{ location }}, Count: {{ availableCount }}
+        <br />
+   {{/each}}
+   
+   <br><br>
+{{/each}}

@@ -1,0 +1,1 @@
+docker run -d -p 27017:27017 -v ./api/data:/data/db -v ./api/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js --name mongodb mongo
